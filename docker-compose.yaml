@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  # --- Data Warehouse (PostgreSQL) ---
+  postgres:
+    image: postgres:15
+    container_name: warehouse_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: warehouse
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - data_network
+
+  # --- Data Lake (MinIO - S3 Compatible) ---
+  minio:
+    image: minio/minio
+    container_name: datalake_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000" # API Port (para o Python/Spark acessar)
+      - "9001:9001" # Console Port (para você acessar no navegador)
+    volumes:
+      - minio_data:/data
+    networks:
+      - data_network
+
+# --- Volumes e Redes ---
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  data_network:
+    driver: bridge

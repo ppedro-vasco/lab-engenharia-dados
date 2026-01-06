@@ -1,0 +1,21 @@
+# Ambientes Virtuais
+.venv/
+env/
+venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Dados (Nunca versione dados brutos ou processados!)
+data/
+
+# Logs e Arquivos do Sistema
+.DS_Store
+*.log
+
+# VS Code
+.vscode/
+
+# Jupyter Notebooks (checkpoints)
+.ipynb_checkpoints/
