@@ -1,49 +1,7 @@
 import sys
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, to_date
 
-# --- Configurações ---
-MINIO_ENDPOINT = "http://localhost:9000"
-ACCESS_KEY = "minioadmin"
-SECRET_KEY = "minioadmin"
-BUCKET_RAW = "landing-zone"
-BUCKET_SILVER = "processing-zone"
-
-def get_spark_session():
-    """
-    Cria a sessão Spark.
-    Correção aplicada: Lista completa de overrides para evitar erros de formato de tempo ("60s", "24h").
-    """
-    return (SparkSession.builder
-            .appName("OlistProcessing")
-            .master("local[*]")
-            .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.540")
-            
-            # --- Configurações Básicas S3 MinIO ---
-            .config("spark.hadoop.fs.s3a.endpoint", MINIO_ENDPOINT)
-            .config("spark.hadoop.fs.s3a.access.key", ACCESS_KEY)
-            .config("spark.hadoop.fs.s3a.secret.key", SECRET_KEY)
-            .config("spark.hadoop.fs.s3a.path.style.access", "true")
-            .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-            .config("spark.hadoop.fs.s3a.connection.ssl.enabled", "false")
-            
-            # --- CREDENTIAL PROVIDER (Evita erro ClassNotFound AWS V2) ---
-            .config("spark.hadoop.fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider")
-            
-            # --- CORREÇÃO DE FORMATOS DE TEMPO (O "Whac-A-Mole") ---
-            # Substituímos tudo que tem 's' (segundos) ou 'h' (horas) por números inteiros
-            .config("spark.hadoop.fs.s3a.connection.establish.timeout", "5000")
-            .config("spark.hadoop.fs.s3a.connection.timeout", "10000")
-            .config("spark.hadoop.fs.s3a.threads.keepalivetime", "60")
-            .config("spark.hadoop.fs.s3a.socket.timeout", "5000")
-            .config("spark.hadoop.fs.s3a.max.total.tasks", "20")
-            
-            # A CULPADA DO ERRO "24h": Multipart Purge Age (86400 segundos = 24h)
-            .config("spark.hadoop.fs.s3a.multipart.size", "104857600")
-            .config("spark.hadoop.fs.s3a.multipart.purge.age", "86400")
-            .config("spark.hadoop.fs.s3a.multipart.purge", "false") 
-            
-            .getOrCreate())
+from utils import get_spark_session, BUCKET_RAW, BUCKET_SILVER
 
 def process_orders(spark):
     print("--> Processando Tabela de Pedidos...")
@@ -54,8 +12,6 @@ def process_orders(spark):
         print(f"--> Arquivo lido com sucesso: {path}")
     except Exception as e:
         print(f"!!! Erro ao ler arquivo: {e}")
-        # import traceback
-        # traceback.print_exc()
         return
 
     # Transformação
@@ -78,7 +34,7 @@ def process_orders(spark):
          print(f"!!! Erro ao salvar parquet: {e}")
 
 def main():
-    spark = get_spark_session()
+    spark = get_spark_session("OlistProcessing")
     process_orders(spark)
     spark.stop()
 

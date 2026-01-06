@@ -2,17 +2,12 @@ import boto3
 import os
 import logging
 from botocore.exceptions import ClientError
+from utils import MINIO_ENDPOINT, ACCESS_KEY, SECRET_KEY, BUCKET_RAW
 
 # --- Configurações ---
-# No mundo real, usaríamos variáveis de ambiente (.env) para esconder as senhas
-# Como é um lab local, vamos deixar explícito por enquanto.
-AWS_ACCESS_KEY = "minioadmin"
-AWS_SECRET_KEY = "minioadmin"
-ENDPOINT_URL = "http://localhost:9000" # Porta da API (não a do console 9001!)
-BUCKET_NAME = "landing-zone"
 LOCAL_DATA_FOLDER = "./data/raw"
 
-# Configuração de Logs (Para parecer profissional)
+# Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def create_bucket_if_not_exists(s3_client, bucket_name):
@@ -40,7 +35,7 @@ def upload_files(s3_client, bucket_name, local_folder):
 
     for file_name in files:
         local_path = os.path.join(local_folder, file_name)
-        s3_path = f"olist/{file_name}" # Organizando dentro de uma "pasta" no bucket
+        s3_path = f"olist/{file_name}"
 
         try:
             logging.info(f"Enviando: {file_name} -> s3://{bucket_name}/{s3_path}")
@@ -54,16 +49,16 @@ def main():
     # 1. Criar o Cliente S3 (Conectando no MinIO)
     s3_client = boto3.client(
         's3',
-        aws_access_key_id=AWS_ACCESS_KEY,
-        aws_secret_access_key=AWS_SECRET_KEY,
-        endpoint_url=ENDPOINT_URL
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+        endpoint_url=MINIO_ENDPOINT
     )
 
     # 2. Garantir que o Bucket existe
-    create_bucket_if_not_exists(s3_client, BUCKET_NAME)
+    create_bucket_if_not_exists(s3_client, BUCKET_RAW)
 
     # 3. Fazer o Upload
-    upload_files(s3_client, BUCKET_NAME, LOCAL_DATA_FOLDER)
+    upload_files(s3_client, BUCKET_RAW, LOCAL_DATA_FOLDER)
 
 if __name__ == "__main__":
     main()
