@@ -1,5 +1,8 @@
 import sys
 from utils import get_spark_session, DB_URL, DB_USER, DB_PASS, DB_DRIVER, BUCKET_SILVER
+from pyspark.sql.functions import col, datediff
+
+
 
 def save_to_postgres(df, table_name):
     print(f"--> Escrevendo tabela '{table_name}' no Postgres...")
@@ -28,12 +31,24 @@ def main():
     try:
         df_silver = spark.read.parquet(source_path)
         print(f"--> Registros lidos: {df_silver.count()}")
+
+        print(f"--> Calculando performance de entrega...")
+        df_gold = df_silver.withColumn(
+            "delivery_delay_days", 
+            datediff(col("order_delivered_customer_date"), 
+                     col("order_estimated_delivery_date")
+                    ))
+        
+        df_gold.select("order_delivered_customer_date",
+                       "order_estimated_delivery_date",
+                       "delivery_delay_days").show(5)
+
     except Exception as e:
-        print(f"!!! Erro ao ler Parquet (você rodou o script anterior?): {e}")
+        print(f"!!! Erro ao ler Parquet: {e}")
         return
 
     # 2. Salvar na Gold Layer (Postgres)
-    save_to_postgres(df_silver, "fact_orders")
+    save_to_postgres(df_gold, "fact_orders")
     
     spark.stop()
 
