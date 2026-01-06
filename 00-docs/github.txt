@@ -1,0 +1,119 @@
+========================================
+FLUXO PADRÃO DE TRABALHO COM GIT + GITHUB
+(issue → branch → commit → PR → merge)
+========================================
+
+----------------------------------------
+1) CRIAR ISSUE NO GITHUB
+----------------------------------------
+- Criar Issue no repositório (GitHub UI)
+- Anotar o número da Issue (ex: #2)
+
+----------------------------------------
+2) GARANTIR QUE O BRANCH BASE ESTÁ ATUALIZADO
+----------------------------------------
+git checkout development
+git pull origin development
+
+----------------------------------------
+3) CRIAR BRANCH DA ISSUE
+----------------------------------------
+git checkout -b feature/issue-2-delivery-delay
+
+Padrão de nome:
+feature/issue-<numero>-<descricao-curta>
+
+----------------------------------------
+4) DESENVOLVER A SOLUÇÃO
+----------------------------------------
+# editar arquivos
+# implementar código
+# rodar testes / pipeline
+
+----------------------------------------
+5) VERIFICAR ALTERAÇÕES
+----------------------------------------
+git status
+git diff
+
+----------------------------------------
+6) ADICIONAR ARQUIVOS AO STAGE
+----------------------------------------
+git add .
+
+# ou seletivo:
+# git add src/03_gold_layer.py
+
+----------------------------------------
+7) COMMITAR REFERENCIANDO A ISSUE
+----------------------------------------
+git commit -m "Add delivery delay calculation to fact_orders (#2)"
+
+OBS:
+- NÃO usar "Fixes #2" aqui
+- Apenas referência
+
+----------------------------------------
+8) ENVIAR BRANCH PARA O REMOTO
+----------------------------------------
+git push -u origin feature/issue-2-delivery-delay
+
+----------------------------------------
+9) ABRIR PULL REQUEST (GitHub UI)
+----------------------------------------
+Base: development
+Compare: feature/issue-2-delivery-delay
+
+Descrição do PR:
+- O que foi feito
+- Relacionado à #2
+
+(NÃO usar Fixes aqui)
+
+----------------------------------------
+10) MERGE DO PR (feature → development)
+----------------------------------------
+- Revisar
+- Resolver comentários
+- Mergear no GitHub
+
+----------------------------------------
+11) APAGAR BRANCH DA FEATURE (OPCIONAL, MAS RECOMENDADO)
+----------------------------------------
+# local
+git checkout development
+git branch -d feature/issue-2-delivery-delay
+
+# remoto
+git push origin --delete feature/issue-2-delivery-delay
+
+----------------------------------------
+12) PR FINAL: development → main
+----------------------------------------
+Criar novo PR no GitHub:
+
+Base: main
+Compare: development
+
+Descrição do PR:
+Fixes #2
+
+----------------------------------------
+13) MERGE FINAL
+----------------------------------------
+- Mergear PR
+- Issue #2 será fechada automaticamente
+- Card pode ser movido para Done no Kanban
+
+----------------------------------------
+14) ATUALIZAR BRANCHES LOCAIS
+----------------------------------------
+git checkout main
+git pull origin main
+
+git checkout development
+git pull origin development
+
+----------------------------------------
+FIM DO FLUXO
+----------------------------------------
