@@ -2,7 +2,7 @@ import boto3
 import os
 import logging
 from botocore.exceptions import ClientError
-from utils import MINIO_ENDPOINT, ACCESS_KEY, SECRET_KEY, BUCKET_RAW
+from utils import MINIO_ENDPOINT, ACCESS_KEY, SECRET_KEY, BUCKET_RAW, BUCKET_SILVER
 
 # --- Configurações ---
 LOCAL_DATA_FOLDER = "./data/raw"
@@ -54,8 +54,9 @@ def main():
         endpoint_url=MINIO_ENDPOINT
     )
 
-    # 2. Garantir que o Bucket existe
+    # 2. Garantir que os Buckets existem
     create_bucket_if_not_exists(s3_client, BUCKET_RAW)
+    create_bucket_if_not_exists(s3_client, BUCKET_SILVER)
 
     # 3. Fazer o Upload
     upload_files(s3_client, BUCKET_RAW, LOCAL_DATA_FOLDER)
