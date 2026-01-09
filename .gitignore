@@ -19,3 +19,13 @@ data/
 
 # Jupyter Notebooks (checkpoints)
 .ipynb_checkpoints/
+
+# Spark / Hadoop / MinIO outputs
+s3a.*/
+landing-zone/
+processing-zone/
+
+# Spark artifacts
+_SUCCESS
+*.crc
+*.parquet
